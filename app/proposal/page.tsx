@@ -91,8 +91,17 @@ export default function ProposalPage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading(true)
     setUploadError(null)
+
+    // Show local preview immediately using base64
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setProposal((p) => ({ ...p, logoUrl: ev.target?.result as string }))
+    }
+    reader.readAsDataURL(file)
+
+    // Upload to R2 in background and replace with CDN URL
+    setUploading(true)
     try {
       const fd = new FormData()
       fd.append('file', file)
@@ -291,6 +300,10 @@ export default function ProposalPage() {
                     src={proposal.logoUrl}
                     alt="Logo preview"
                     className="h-12 object-contain border border-gray-200 rounded-lg p-1 bg-gray-50"
+                    onError={(e) => {
+                      console.error('Logo failed to load:', proposal.logoUrl)
+                      e.currentTarget.style.display = 'none'
+                    }}
                   />
                   <button
                     onClick={() => set('logoUrl', '')}
