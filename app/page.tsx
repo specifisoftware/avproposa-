@@ -27,13 +27,18 @@ export default function AuthPage() {
       if (tab === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        router.push('/proposal')
-        router.refresh()
+        window.location.href = '/proposal'
       } else {
         const { error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
-        setSuccess('Account created! Check your email to confirm, then sign in.')
-        setTab('login')
+        // If email confirmation is off, sign in immediately
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
+        if (loginError) {
+          setSuccess('Account created! Now sign in.')
+          setTab('login')
+        } else {
+          window.location.href = '/proposal'
+        }
         setPassword('')
       }
     } catch (err: unknown) {
