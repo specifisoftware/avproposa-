@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v2 as cloudinary } from 'cloudinary'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
 })
 
 export async function POST(request: NextRequest) {
@@ -22,16 +25,22 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`
+    const ext = file.name.split('.').pop() ?? 'png'
+    const key = `logos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: 'avproposal-logos',
-      transformation: [{ width: 400, height: 200, crop: 'limit' }],
-    })
+    await r2.send(
+      new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+      }),
+    )
 
-    return NextResponse.json({ url: result.secure_url })
+    const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`
+    return NextResponse.json({ url: publicUrl })
   } catch (err) {
-    console.error('Cloudinary upload error:', err)
+    console.error('R2 upload error:', err)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
   }
 }
