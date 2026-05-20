@@ -223,7 +223,7 @@ export default function HomePage() {
             {/* connector line (desktop) */}
             <div className="hidden md:block absolute top-8 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)] h-px bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100" />
 
-            {steps.map((s, i) => (
+            {steps.map((s) => (
               <div key={s.number} className="relative text-center md:text-left">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[#0F172A] text-white rounded-2xl text-2xl font-black mb-5 relative z-10">
                   {s.number}
