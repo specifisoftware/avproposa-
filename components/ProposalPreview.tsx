@@ -17,7 +17,8 @@ export default function ProposalPreview({ data }: ProposalPreviewProps) {
         padding: '40px 48px',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         color: '#1e293b',
-        minWidth: '640px',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       {/* Header */}

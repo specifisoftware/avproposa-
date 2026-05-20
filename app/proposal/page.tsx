@@ -39,8 +39,6 @@ export default function ProposalPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
-  const [previewZoom, setPreviewZoom] = useState(1)
-  const previewWrapRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -69,18 +67,6 @@ export default function ProposalPage() {
     }
     init()
   }, [router])
-
-  // Scale preview to fit its container width
-  useEffect(() => {
-    const el = previewWrapRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      const avail = el.clientWidth - 32
-      setPreviewZoom(Math.min(1, avail / 640))
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -466,11 +452,9 @@ export default function ProposalPage() {
                 </p>
                 <span className="text-xs text-slate-300">Updates as you type</span>
               </div>
-              <div ref={previewWrapRef} className="flex-1 min-h-0 overflow-y-auto bg-gray-100 p-4 rounded-b-2xl">
-                <div style={{ zoom: previewZoom }}>
-                  <div className="shadow-xl rounded-lg overflow-hidden">
-                    <ProposalPreview data={proposal} />
-                  </div>
+              <div className="flex-1 min-h-0 overflow-y-auto bg-gray-100 p-4 rounded-b-2xl">
+                <div className="shadow-xl rounded-lg overflow-hidden w-full">
+                  <ProposalPreview data={proposal} />
                 </div>
               </div>
             </div>
