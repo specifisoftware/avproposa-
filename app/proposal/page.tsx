@@ -39,6 +39,7 @@ export default function ProposalPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form')
   const router = useRouter()
 
   useEffect(() => {
@@ -225,16 +226,33 @@ export default function ProposalPage() {
         </div>
       )}
 
+      {/* Mobile tab switcher — hidden on desktop */}
+      <div className="lg:hidden sticky top-[57px] z-20 bg-white border-b border-gray-200 flex shrink-0">
+        {(['form', 'preview'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setMobileTab(t)}
+            className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+              mobileTab === t
+                ? 'text-[#2563EB] border-[#2563EB]'
+                : 'text-slate-400 border-transparent'
+            }`}
+          >
+            {t === 'form' ? 'Form' : 'Preview'}
+          </button>
+        ))}
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex flex-col lg:flex-row items-start gap-6">
 
           {/* ── Left: Form ── */}
-          <div className="w-full lg:w-1/2 space-y-5">
+          <div className={`w-full lg:w-1/2 space-y-5 ${mobileTab === 'preview' ? 'hidden lg:block' : ''}`}>
 
             {/* Project Info */}
             <Card>
               <SectionHeader title="Project Info" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">Client Name</label>
                   <input
@@ -443,7 +461,22 @@ export default function ProposalPage() {
             </div>
           </div>
 
-          {/* ── Right: Preview ── */}
+          {/* ── Mobile Preview (tab = preview) ── */}
+          {mobileTab === 'preview' && (
+            <div className="w-full lg:hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Live Preview</p>
+                  <span className="text-xs text-slate-300">Updates as you type</span>
+                </div>
+                <div className="overflow-x-auto bg-gray-100 p-4">
+                  <ProposalPreview data={proposal} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Right: Preview (desktop) ── */}
           <div className="hidden lg:flex w-1/2 flex-col sticky top-[73px] h-[calc(100vh-73px)]">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 flex items-center justify-between rounded-t-2xl">

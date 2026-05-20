@@ -87,7 +87,8 @@ export default function RoomCard({ room, onUpdate, onDelete }: RoomCardProps) {
 
       {/* Equipment table */}
       {room.equipment.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-3 overflow-x-auto -mx-4 px-4">
+          <div style={{ minWidth: '380px' }}>
           <div className="grid gap-2 text-xs font-medium text-slate-400 mb-1.5 px-1"
                style={{ gridTemplateColumns: '1fr 52px 90px 80px 24px' }}>
             <span>Item</span>
@@ -140,6 +141,7 @@ export default function RoomCard({ room, onUpdate, onDelete }: RoomCardProps) {
               </button>
             </div>
           ))}
+          </div>
         </div>
       )}
 

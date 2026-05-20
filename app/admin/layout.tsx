@@ -28,6 +28,7 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -55,9 +56,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50">
+
+      {/* Mobile top bar */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#0F172A] text-white shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-[#2563EB] rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2.5">
+              <path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 1 1 0 10h-2M8 12h8" />
+            </svg>
+          </div>
+          <span className="text-sm font-bold">Admin Panel</span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen((o) => !o)}
+          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Toggle menu"
+        >
+          {sidebarOpen ? (
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-52 bg-[#0F172A] text-white flex flex-col shrink-0">
+      <aside className={`
+        fixed lg:relative inset-y-0 left-0 z-50 w-52 bg-[#0F172A] text-white flex flex-col shrink-0
+        transition-transform duration-200
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         <div className="px-5 py-5 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-[#2563EB] rounded-md flex items-center justify-center shrink-0">
@@ -75,6 +116,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={href}
               href={href}
+              onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname.startsWith(href)
                   ? 'bg-white/10 text-white'
@@ -111,7 +153,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-w-0">
         {children}
       </main>
     </div>

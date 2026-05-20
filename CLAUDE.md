@@ -86,6 +86,23 @@ Logo uploads use base64 for instant local preview, then replace with R2 CDN URL 
 html2canvas captures `#proposal-preview` div at 2× scale, jsPDF converts to A4.
 Multi-page support: canvas is split across pages if content exceeds one page height.
 
+## Mobile-first design
+
+**Mobile-friendliness is a core requirement.** Every page and component must work on screens ≥ 375 px wide.
+
+Rules that must never be broken:
+- All layouts use responsive Tailwind breakpoints (`sm:`, `md:`, `lg:`). No fixed pixel widths in layout.
+- Touch targets are at least 44 px tall/wide.
+- No horizontal overflow — use `overflow-x-auto` on tables/grids that can't reflow.
+- Sticky elements account for the mobile navbar height (57 px).
+
+Page-specific behaviour:
+- **Proposal builder** — on mobile a Form / Preview tab switcher (`lg:hidden`) lets users toggle between the form and the live preview. The desktop two-column layout is preserved with `lg:flex`.
+- **Admin panel** — sidebar is hidden on mobile; a hamburger button in the top bar slides it in as a fixed overlay (`fixed lg:relative`). Links close the drawer on tap.
+- **Home / Blog / Auth** — single-column on mobile, expand at `sm:` / `lg:`.
+
+When adding any new page or component, verify it on a 375 px viewport before committing.
+
 ## Deployment
 
 GitHub repo: `https://github.com/specifisoftware/avproposa-`

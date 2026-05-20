@@ -23,13 +23,16 @@ export default function Navbar({ userEmail, onLogout, proposalsToday }: NavbarPr
 
         <div className="flex items-center gap-3">
           <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
               limitReached
                 ? 'bg-red-100 text-red-600'
                 : 'bg-emerald-100 text-emerald-700'
             }`}
           >
-            {limitReached ? '1 of 1 free used' : '1 free remaining today'}
+            {limitReached
+              ? <><span className="sm:hidden">Limit reached</span><span className="hidden sm:inline">1 of 1 free used</span></>
+              : <><span className="sm:hidden">1 free left</span><span className="hidden sm:inline">1 free remaining today</span></>
+            }
           </span>
 
           <span className="hidden sm:block text-sm text-slate-400">{userEmail}</span>
