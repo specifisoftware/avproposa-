@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
@@ -39,6 +39,8 @@ export default function ProposalPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  const [previewZoom, setPreviewZoom] = useState(1)
+  const previewWrapRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -67,6 +69,18 @@ export default function ProposalPage() {
     }
     init()
   }, [router])
+
+  // Scale preview to fit its container width
+  useEffect(() => {
+    const el = previewWrapRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => {
+      const avail = el.clientWidth - 32
+      setPreviewZoom(Math.min(1, avail / 640))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -444,17 +458,19 @@ export default function ProposalPage() {
           </div>
 
           {/* ── Right: Preview ── */}
-          <div className="lg:sticky lg:top-[73px] h-auto lg:h-[calc(100vh-5.5rem)] flex flex-col">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden">
-              <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 flex items-center justify-between">
+          <div className="lg:sticky lg:top-[73px] lg:h-[calc(100vh-5.5rem)] flex flex-col">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full min-h-[500px]">
+              <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 flex items-center justify-between rounded-t-2xl">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   Live Preview
                 </p>
                 <span className="text-xs text-slate-300">Updates as you type</span>
               </div>
-              <div className="flex-1 overflow-y-auto bg-gray-100 p-4">
-                <div className="shadow-xl rounded-lg overflow-hidden">
-                  <ProposalPreview data={proposal} />
+              <div ref={previewWrapRef} className="flex-1 min-h-0 overflow-y-auto bg-gray-100 p-4 rounded-b-2xl">
+                <div style={{ zoom: previewZoom }}>
+                  <div className="shadow-xl rounded-lg overflow-hidden">
+                    <ProposalPreview data={proposal} />
+                  </div>
                 </div>
               </div>
             </div>
