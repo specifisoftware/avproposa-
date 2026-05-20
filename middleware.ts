@@ -35,8 +35,8 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Unauthenticated users trying to access /proposal → send to /auth
-  if (!session && pathname.startsWith('/proposal')) {
+  // Unauthenticated users → send to /auth
+  if (!session && (pathname.startsWith('/proposal') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL('/auth', request.url))
   }
 
@@ -49,5 +49,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/auth', '/proposal/:path*'],
+  matcher: ['/auth', '/proposal/:path*', '/admin/:path*'],
 }
