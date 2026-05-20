@@ -5,7 +5,6 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // Skip auth guard when Supabase isn't configured yet
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.startsWith('your_')) {
     return NextResponse.next({ request: { headers: request.headers } })
   }
@@ -34,11 +33,15 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session && request.nextUrl.pathname.startsWith('/proposal')) {
-    return NextResponse.redirect(new URL('/', request.url))
+  const pathname = request.nextUrl.pathname
+
+  // Unauthenticated users trying to access /proposal → send to /auth
+  if (!session && pathname.startsWith('/proposal')) {
+    return NextResponse.redirect(new URL('/auth', request.url))
   }
 
-  if (session && request.nextUrl.pathname === '/') {
+  // Authenticated users visiting /auth → send to /proposal
+  if (session && pathname === '/auth') {
     return NextResponse.redirect(new URL('/proposal', request.url))
   }
 
@@ -46,5 +49,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/proposal/:path*'],
+  matcher: ['/auth', '/proposal/:path*'],
 }

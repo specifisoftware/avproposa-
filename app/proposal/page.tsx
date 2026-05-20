@@ -49,7 +49,7 @@ export default function ProposalPage() {
       } = await supabase.auth.getUser()
 
       if (!user) {
-        router.replace('/')
+        router.replace('/auth')
         return
       }
 
@@ -71,7 +71,7 @@ export default function ProposalPage() {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.replace('/')
+    router.replace('/auth')
   }
 
   // ----- rooms -----
