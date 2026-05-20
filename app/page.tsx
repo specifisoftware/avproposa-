@@ -97,6 +97,7 @@ export default function HomePage() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-500 font-medium">
             <a href="#features" className="hover:text-[#0F172A] transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-[#0F172A] transition-colors">How it works</a>
+            <Link href="/blog" className="hover:text-[#0F172A] transition-colors">Blog</Link>
           </nav>
 
           {/* Auth buttons */}
