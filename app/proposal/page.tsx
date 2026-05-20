@@ -141,42 +141,54 @@ export default function ProposalPage() {
       }
       setProposalsToday(1)
 
-      // Generate PDF from preview element
+      // Generate PDF — render at A4 width in an off-screen container
+      // so display:none / panel width / scroll position never affect the output
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
 
-      const element = document.getElementById('proposal-preview')
-      if (!element) throw new Error('Preview element not found')
+      const source = document.getElementById('proposal-preview')
+      if (!source) throw new Error('Preview element not found')
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        scrollY: 0,
-        scrollX: 0,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-      })
+      const A4_PX = 794 // A4 at 96 dpi
+
+      const wrap = document.createElement('div')
+      wrap.style.cssText = `position:fixed;top:0;left:-9999px;width:${A4_PX}px;background:#fff;z-index:-1`
+      const clone = source.cloneNode(true) as HTMLElement
+      clone.style.width = `${A4_PX}px`
+      clone.style.boxSizing = 'border-box'
+      wrap.appendChild(clone)
+      document.body.appendChild(wrap)
+
+      let canvas: HTMLCanvasElement
+      try {
+        canvas = await html2canvas(clone, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: A4_PX,
+          windowWidth: A4_PX,
+          backgroundColor: '#ffffff',
+        })
+      } finally {
+        document.body.removeChild(wrap)
+      }
 
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = pdf.internal.pageSize.getHeight()
-      const canvasRatio = canvas.height / canvas.width
-      const imgH = pdfWidth * canvasRatio
-      let remaining = imgH
+      const pdfW = pdf.internal.pageSize.getWidth()
+      const pdfH = pdf.internal.pageSize.getHeight()
+      const imgH = pdfW * (canvas.height / canvas.width)
       let yOffset = 0
+      let remaining = imgH
 
-      pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imgH)
-      remaining -= pdfHeight
+      pdf.addImage(imgData, 'PNG', 0, yOffset, pdfW, imgH)
+      remaining -= pdfH
 
       while (remaining > 0) {
-        yOffset -= pdfHeight
+        yOffset -= pdfH
         pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imgH)
-        remaining -= pdfHeight
+        pdf.addImage(imgData, 'PNG', 0, yOffset, pdfW, imgH)
+        remaining -= pdfH
       }
 
       pdf.save(`proposal-${proposal.proposalNumber || 'draft'}.pdf`)
