@@ -13,6 +13,7 @@ import {
 import Navbar from '@/components/Navbar'
 import ProposalPreview from '@/components/ProposalPreview'
 import RoomCard from '@/components/RoomCard'
+import { SideBanner } from '@/components/SideBanner'
 
 function SectionHeader({ title }: { title: string }) {
   return (
@@ -40,6 +41,7 @@ export default function ProposalPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
   const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form')
+  const [banners, setBanners] = useState<{ left: { image_url: string; link_url: string | null } | null; right: { image_url: string; link_url: string | null } | null }>({ left: null, right: null })
   const router = useRouter()
 
   useEffect(() => {
@@ -68,6 +70,21 @@ export default function ProposalPage() {
     }
     init()
   }, [router])
+
+  // Fetch active banners
+  useEffect(() => {
+    createClient()
+      .from('banners')
+      .select('position, image_url, link_url')
+      .eq('active', true)
+      .then(({ data }) => {
+        if (!data) return
+        setBanners({
+          left: data.find((b) => b.position === 'left') ?? null,
+          right: data.find((b) => b.position === 'right') ?? null,
+        })
+      })
+  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -255,7 +272,17 @@ export default function ProposalPage() {
         ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <div className="flex gap-3 py-6 px-2 sm:px-4">
+
+        {/* Left banner — 2xl+ only */}
+        <div className="hidden 2xl:flex w-[140px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
+          {banners.left && (
+            <SideBanner imageUrl={banners.left.image_url} linkUrl={banners.left.link_url} />
+          )}
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 min-w-0 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-start gap-6">
 
           {/* ── Left: Form ── */}
@@ -506,7 +533,16 @@ export default function ProposalPage() {
           </div>
 
         </div>
-      </div>
+        </div>{/* end main content */}
+
+        {/* Right banner — 2xl+ only */}
+        <div className="hidden 2xl:flex w-[140px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
+          {banners.right && (
+            <SideBanner imageUrl={banners.right.image_url} linkUrl={banners.right.link_url} />
+          )}
+        </div>
+
+      </div>{/* end three-col flex */}
     </div>
   )
 }
