@@ -240,10 +240,10 @@ export default function ProposalPage() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="flex flex-col lg:flex-row items-start gap-6">
 
           {/* ── Left: Form ── */}
-          <div className="space-y-5">
+          <div className="w-full lg:w-1/2 space-y-5">
 
             {/* Project Info */}
             <Card>
@@ -458,8 +458,8 @@ export default function ProposalPage() {
           </div>
 
           {/* ── Right: Preview ── */}
-          <div className="lg:sticky lg:top-[73px] lg:h-[calc(100vh-5.5rem)] flex flex-col">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full min-h-[500px]">
+          <div className="hidden lg:flex w-1/2 flex-col sticky top-[73px] h-[calc(100vh-73px)]">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 flex items-center justify-between rounded-t-2xl">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   Live Preview
