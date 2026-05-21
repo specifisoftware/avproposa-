@@ -12,6 +12,9 @@ const geistSans = localFont({
 export const metadata: Metadata = {
   title: 'AVProposal — Professional AV Proposals',
   description: 'Generate professional Audio/Video proposals instantly',
+  verification: {
+    google: 'Jr2IVK2xeuIrY5u2WiiQWob_qzaI6KiPDVgB09lGcqo',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
