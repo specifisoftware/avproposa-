@@ -51,25 +51,17 @@ export default function BannersPage() {
 
   const upload = async (pos: 'left' | 'right', file: File) => {
     const set = pos === 'left' ? setLeft : setRight
+    set((s) => ({ ...s, uploading: true, error: null }))
 
-    // Show base64 preview immediately
     const reader = new FileReader()
     reader.onload = (ev) => {
-      set((s) => ({ ...s, previewUrl: ev.target?.result as string }))
+      const base64 = ev.target?.result as string
+      set((s) => ({ ...s, previewUrl: base64, imageUrl: base64, uploading: false }))
+    }
+    reader.onerror = () => {
+      set((s) => ({ ...s, uploading: false, error: 'Failed to read file' }))
     }
     reader.readAsDataURL(file)
-
-    set((s) => ({ ...s, uploading: true, error: null }))
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Upload failed')
-      set((s) => ({ ...s, imageUrl: json.url, uploading: false }))
-    } catch (e) {
-      set((s) => ({ ...s, uploading: false, error: e instanceof Error ? e.message : 'Upload failed' }))
-    }
   }
 
   const save = async (pos: 'left' | 'right') => {
