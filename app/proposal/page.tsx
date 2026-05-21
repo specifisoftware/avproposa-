@@ -36,6 +36,7 @@ export default function ProposalPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [proposal, setProposal] = useState<ProposalData>(makeDefaultProposal())
   const [proposalsToday, setProposalsToday] = useState(0)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -58,14 +59,12 @@ export default function ProposalPage() {
 
       setUser({ id: user.id, email: user.email })
 
-      const today = new Date().toISOString().split('T')[0]
-      const { data } = await supabase
-        .from('proposals')
-        .select('id')
-        .eq('user_id', user.id)
-        .gte('created_at', today + 'T00:00:00.000Z')
-
-      setProposalsToday(data?.length ?? 0)
+      const res = await fetch('/api/proposals')
+      if (res.ok) {
+        const json = await res.json()
+        setProposalsToday(json.count ?? 0)
+        setIsAdmin(json.isAdmin === true)
+      }
       setPageLoading(false)
     }
     init()
@@ -137,7 +136,7 @@ export default function ProposalPage() {
 
   // ----- download PDF -----
   const handleDownload = async () => {
-    if (proposalsToday >= 1 || downloading) return
+    if ((!isAdmin && proposalsToday >= 1) || downloading) return
     setDownloading(true)
     setDownloadError(null)
 
@@ -151,12 +150,12 @@ export default function ProposalPage() {
       if (!res.ok) {
         const json = await res.json()
         if (res.status === 429) {
-          setProposalsToday(1)
+          if (!isAdmin) setProposalsToday(1)
           return
         }
         throw new Error(json.error ?? 'Could not save proposal record')
       }
-      setProposalsToday(1)
+      if (!isAdmin) setProposalsToday(1)
 
       // Generate PDF — render at A4 width in an off-screen container
       // so display:none / panel width / scroll position never affect the output
@@ -220,7 +219,7 @@ export default function ProposalPage() {
   const subtotal = calcSubtotal(proposal.rooms)
   const taxAmount = subtotal * (proposal.taxRate / 100)
   const grandTotal = subtotal + taxAmount
-  const limitReached = proposalsToday >= 1
+  const limitReached = !isAdmin && proposalsToday >= 1
 
   // ----- field helper -----
   const set = <K extends keyof ProposalData>(key: K, value: ProposalData[K]) =>

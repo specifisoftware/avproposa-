@@ -33,6 +33,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.is_admin) {
+    return NextResponse.json({ count: 0, isAdmin: true })
+  }
+
   const today = new Date().toISOString().split('T')[0]
   const { data, error } = await supabase
     .from('proposals')
@@ -44,7 +54,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ count: data?.length ?? 0 })
+  return NextResponse.json({ count: data?.length ?? 0, isAdmin: false })
 }
 
 export async function POST(request: Request) {
@@ -57,16 +67,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
   const today = new Date().toISOString().split('T')[0]
 
-  const { data: existing } = await supabase
-    .from('proposals')
-    .select('id')
-    .eq('user_id', user.id)
-    .gte('created_at', today + 'T00:00:00.000Z')
+  if (!profile?.is_admin) {
+    const { data: existing } = await supabase
+      .from('proposals')
+      .select('id')
+      .eq('user_id', user.id)
+      .gte('created_at', today + 'T00:00:00.000Z')
 
-  if (existing && existing.length >= 1) {
-    return NextResponse.json({ error: 'Daily limit reached' }, { status: 429 })
+    if (existing && existing.length >= 1) {
+      return NextResponse.json({ error: 'Daily limit reached' }, { status: 429 })
+    }
   }
 
   const body = await request.json().catch(() => ({}))
