@@ -117,7 +117,7 @@ export default function ProposalPage() {
     }
     reader.readAsDataURL(file)
 
-    // Upload to R2 in background and replace with CDN URL
+    // Upload to R2 in background for storage — keep base64 in state to avoid CORS issues
     setUploading(true)
     try {
       const fd = new FormData()
@@ -125,7 +125,7 @@ export default function ProposalPage() {
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Upload failed')
-      setProposal((p) => ({ ...p, logoUrl: json.url }))
+      // base64 stays in logoUrl — R2 URL stored for reference only
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
