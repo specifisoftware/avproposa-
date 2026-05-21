@@ -14,6 +14,7 @@ type Banner = {
 type Slot = {
   data: Banner | null
   imageUrl: string
+  previewUrl: string
   linkUrl: string
   active: boolean
   uploading: boolean
@@ -24,6 +25,7 @@ type Slot = {
 const init = (b: Banner | null): Slot => ({
   data: b,
   imageUrl: b?.image_url ?? '',
+  previewUrl: b?.image_url ?? '',
   linkUrl: b?.link_url ?? '',
   active: b?.active ?? true,
   uploading: false,
@@ -49,6 +51,14 @@ export default function BannersPage() {
 
   const upload = async (pos: 'left' | 'right', file: File) => {
     const set = pos === 'left' ? setLeft : setRight
+
+    // Show base64 preview immediately
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      set((s) => ({ ...s, previewUrl: ev.target?.result as string }))
+    }
+    reader.readAsDataURL(file)
+
     set((s) => ({ ...s, uploading: true, error: null }))
     try {
       const fd = new FormData()
@@ -157,11 +167,11 @@ export default function BannersPage() {
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">
                   Banner Image
                 </label>
-                {s.imageUrl ? (
+                {s.previewUrl ? (
                   <div className="relative group rounded-xl overflow-hidden border border-gray-200">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={s.imageUrl}
+                      src={s.previewUrl}
                       alt="Banner preview"
                       className="w-full object-cover"
                       style={{ maxHeight: '220px', objectFit: 'cover' }}
