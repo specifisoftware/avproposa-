@@ -274,7 +274,7 @@ export default function ProposalPage() {
       <div className="flex gap-3 py-6 px-2 sm:px-4">
 
         {/* Left banner — 2xl+ only */}
-        <div className="hidden 2xl:flex w-[140px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
+        <div className="hidden 2xl:flex w-[200px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
           {banners.left && (
             <SideBanner imageUrl={banners.left.image_url} linkUrl={banners.left.link_url} />
           )}
@@ -535,7 +535,7 @@ export default function ProposalPage() {
         </div>{/* end main content */}
 
         {/* Right banner — 2xl+ only */}
-        <div className="hidden 2xl:flex w-[140px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
+        <div className="hidden 2xl:flex w-[200px] shrink-0 flex-col gap-3 self-start sticky top-[73px]">
           {banners.right && (
             <SideBanner imageUrl={banners.right.image_url} linkUrl={banners.right.link_url} />
           )}

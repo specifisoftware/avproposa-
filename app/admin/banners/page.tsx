@@ -114,9 +114,9 @@ export default function BannersPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="text-xs text-blue-700 space-y-0.5">
-            <p><span className="font-semibold">Tövsiyə olunan ölçü:</span> 140 × 400 px</p>
+            <p><span className="font-semibold">Tövsiyə olunan ölçü:</span> 200 × 400 px</p>
             <p><span className="font-semibold">Format:</span> PNG, JPG, WebP</p>
-            <p><span className="font-semibold">Nisbət:</span> Şaquli (portrait) — en 140 px sabit, hündürlük sərbəst</p>
+            <p><span className="font-semibold">Nisbət:</span> Şaquli (portrait) — en 200 px sabit, hündürlük sərbəst</p>
             <p><span className="font-semibold">Maks. fayl ölçüsü:</span> 5 MB</p>
           </div>
         </div>

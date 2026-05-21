@@ -19,6 +19,7 @@ export function SideBanner({ imageUrl, linkUrl }: SideBannerProps) {
       alt="Sponsored"
       onError={() => setFailed(true)}
       className="w-full rounded-xl border border-gray-200 shadow-sm object-cover"
+      style={{ minHeight: '300px', maxHeight: '600px' }}
     />
   )
 
