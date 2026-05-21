@@ -107,6 +107,17 @@ export default function BannersPage() {
         <p className="text-slate-400 text-sm mt-1">
           Shown on the left and right of the proposal builder on wide screens (≥ 1536 px).
         </p>
+        <div className="mt-3 inline-flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+          <svg className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="text-xs text-blue-700 space-y-0.5">
+            <p><span className="font-semibold">Tövsiyə olunan ölçü:</span> 140 × 400 px</p>
+            <p><span className="font-semibold">Format:</span> PNG, JPG, WebP</p>
+            <p><span className="font-semibold">Nisbət:</span> Şaquli (portrait) — en 140 px sabit, hündürlük sərbəst</p>
+            <p><span className="font-semibold">Maks. fayl ölçüsü:</span> 5 MB</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
