@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { BlogIframe } from '@/components/BlogIframe'
 import type { Metadata } from 'next'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 type Props = { params: { slug: string } }
 

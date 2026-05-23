@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function BlogPage() {
   const supabase = createClient(
@@ -72,13 +72,18 @@ export default async function BlogPage() {
                 <article className="h-full border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2563EB] hover:shadow-md transition-all flex flex-col">
                   {/* Cover image or colour accent bar */}
                   {post.cover_image ? (
-                    <div className="w-full h-44 overflow-hidden bg-slate-100 shrink-0">
+                    <div className="w-full h-44 overflow-hidden bg-slate-100 shrink-0 relative">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={post.cover_image}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent px-3 py-2">
+                        <p className="text-white/80 text-[10px] font-mono truncate">
+                          {post.cover_image.split('/').pop()}
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <div

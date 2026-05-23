@@ -96,20 +96,23 @@ export default function BlogEditorPage() {
       }
     }
 
+    const errMsg = (e: unknown) =>
+      e && typeof e === 'object' && 'message' in e ? String((e as { message: unknown }).message) : 'Save failed'
+
     try {
       await trySave(payload)
     } catch (e) {
       // Retry without cover_image if the column doesn't exist yet (migration pending)
-      if (e instanceof Error && e.message.includes('cover_image')) {
+      if (errMsg(e).includes('cover_image')) {
         try {
           const { cover_image: _, ...rest } = payload
           await trySave(rest as typeof payload)
-          setError('Saved (cover image skipped — run migration 004 in Supabase)')
+          setError('Saved — but cover image skipped. Run migration 004 in Supabase SQL Editor.')
         } catch (e2) {
-          setError(e2 instanceof Error ? e2.message : 'Save failed')
+          setError(errMsg(e2))
         }
       } else {
-        setError(e instanceof Error ? e.message : 'Save failed')
+        setError(errMsg(e))
       }
     } finally {
       setSaving(false)
