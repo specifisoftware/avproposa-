@@ -1,0 +1,37 @@
+# AVProposal
+
+> AI-powered AV proposal generator for audio/visual professionals. Create, preview, and download polished client proposals in minutes.
+
+AVProposal lets AV integrators and consultants build branded proposals through a guided form, see a live preview, and export a professional PDF — all in the browser. A built-in blog publishes guides and insights for the AV industry.
+
+## Product
+
+- [Home](https://avproposal.com/): Landing page with features and how-it-works overview
+- [Sign In](https://avproposal.com/auth?tab=login): User login
+- [Register](https://avproposal.com/auth?tab=register): Create a free account
+- [Proposal Builder](https://avproposal.com/proposal): Form + live preview + PDF export (requires login)
+- [Blog](https://avproposal.com/blog): AV industry guides and product updates
+
+## Features
+
+- Guided proposal form: client info, venue details, room-by-room equipment lists
+- Live side-by-side PDF preview rendered in the browser
+- One-click PDF download (html2canvas + jsPDF, A4 multi-page)
+- Company logo upload (stored on Cloudflare R2 CDN)
+- Daily download limit on free tier with upgrade prompt
+- Blog with rich HTML/CSS posts managed by admins
+
+## Tech stack
+
+- Next.js 14 (App Router, TypeScript, Tailwind CSS)
+- Supabase (authentication + database)
+- Cloudflare R2 (logo and image storage)
+- Vercel (hosting, auto-deploys from GitHub)
+
+## Blog
+
+Individual blog posts are available at `/blog/[slug]`. Each post is authored in HTML/CSS by admins and rendered in a sandboxed iframe.
+
+## Optional
+
+- [Sitemap](https://avproposal.com/sitemap.xml)
