@@ -4,11 +4,77 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { QAItem } from '@/types/qa'
 
+function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boolean }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className={`bg-white border rounded-xl overflow-hidden transition-all ${open ? 'border-[#2563EB] shadow-sm' : 'border-gray-200 hover:border-slate-300'}`}>
+      {/* Question row — click to toggle */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-4 px-5 py-4 text-left min-h-[60px] group"
+      >
+        <div className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center transition-colors ${open ? 'bg-[#2563EB]' : 'bg-blue-50 group-hover:bg-[#2563EB]'}`}>
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" strokeWidth="2.5"
+            stroke={open ? 'white' : '#2563EB'}
+            className="group-hover:stroke-white transition-[stroke]"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+          </svg>
+        </div>
+
+        <span className={`flex-1 text-sm font-semibold leading-snug transition-colors ${open ? 'text-[#2563EB]' : 'text-[#0F172A] group-hover:text-[#2563EB]'}`}>
+          {item.question}
+        </span>
+
+        {showCategory && item.category && (
+          <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+            {item.category}
+          </span>
+        )}
+
+        <svg
+          width="15" height="15" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" strokeWidth="2.5"
+          className={`shrink-0 transition-all duration-200 ${open ? 'rotate-180 text-[#2563EB]' : 'text-slate-300 group-hover:text-[#2563EB]'}`}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Inline answer */}
+      {open && (
+        <div className="px-5 pb-5 border-t border-blue-50">
+          <div
+            className="mt-4 text-sm text-slate-600 leading-relaxed [&_a]:text-[#2563EB] [&_a]:underline [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_li]:mb-1 [&_p]:mb-3 [&_p:last-child]:mb-0"
+            dangerouslySetInnerHTML={{
+              __html: item.answer.includes('<')
+                ? item.answer
+                : item.answer.split('\n\n').map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`).join(''),
+            }}
+          />
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <Link
+              href={`/faq/${item.slug}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:underline"
+            >
+              Open full page
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function FAQHub({ items }: { items: QAItem[] }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-  // Unique categories in the order they appear
   const categories = Array.from(
     new Set(items.map((i) => i.category).filter(Boolean))
   ) as string[]
@@ -108,36 +174,11 @@ export function FAQHub({ items }: { items: QAItem[] }) {
       ) : (
         <div className="space-y-2">
           {filtered.map((item) => (
-            <Link
+            <QuestionRow
               key={item.id}
-              href={`/faq/${item.slug}`}
-              className="group flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-5 py-4 hover:border-[#2563EB] hover:shadow-sm transition-all min-h-[60px]"
-            >
-              <div className="w-7 h-7 shrink-0 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-[#2563EB] transition-colors">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#2563EB" strokeWidth="2.5" className="group-hover:stroke-white transition-[stroke]">
-                  <circle cx="12" cy="12" r="10" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-                </svg>
-              </div>
-
-              <span className="flex-1 text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors leading-snug">
-                {item.question}
-              </span>
-
-              {item.category && !activeCategory && (
-                <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
-                  {item.category}
-                </span>
-              )}
-
-              <svg
-                width="15" height="15" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" strokeWidth="2.5"
-                className="shrink-0 text-slate-300 group-hover:text-[#2563EB] transition-colors"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+              item={item}
+              showCategory={!activeCategory && categories.length > 0}
+            />
           ))}
         </div>
       )}
