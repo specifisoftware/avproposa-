@@ -22,7 +22,7 @@ export default function FAQEditorPage() {
   const [answer, setAnswer] = useState('')
   const [category, setCategory] = useState('')
   const [position, setPosition] = useState(0)
-  const [published, setPublished] = useState(false)
+  const [published, setPublished] = useState(true)
 
   useEffect(() => {
     if (isNew) return
