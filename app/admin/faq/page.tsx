@@ -8,6 +8,7 @@ import type { QAItem } from '@/types/qa'
 export default function AdminFAQPage() {
   const [items, setItems] = useState<QAItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [toggleError, setToggleError] = useState<string | null>(null)
 
   useEffect(() => {
     ;(async () => {
@@ -23,8 +24,16 @@ export default function AdminFAQPage() {
   }, [])
 
   const togglePublished = async (id: string, current: boolean) => {
+    setToggleError(null)
     const supabase = createClient()
-    await supabase.from('qa_items').update({ published: !current }).eq('id', id)
+    const { error } = await supabase
+      .from('qa_items')
+      .update({ published: !current })
+      .eq('id', id)
+    if (error) {
+      setToggleError(`Failed to update: ${error.message}`)
+      return
+    }
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, published: !current } : i)))
   }
 
@@ -39,6 +48,11 @@ export default function AdminFAQPage() {
 
   return (
     <div className="p-8 max-w-5xl">
+      {toggleError && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-5">
+          {toggleError}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-[#0F172A]">Q&amp;A Hub</h1>

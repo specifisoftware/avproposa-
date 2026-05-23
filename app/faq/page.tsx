@@ -69,6 +69,9 @@ export default async function FAQPage() {
           <p className="text-slate-400 text-lg">
             Find answers to common questions about AVProposal
           </p>
+          {items && items.length > 0 && (
+            <p className="text-sm text-slate-300 mt-2">{items.length} question{items.length !== 1 ? 's' : ''}</p>
+          )}
         </div>
 
         {items && items.length > 0 ? (
