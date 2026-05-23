@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase'
 import type { QAItem } from '@/types/qa'
 
 function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boolean }) {
@@ -9,7 +10,6 @@ function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boole
 
   return (
     <div className={`bg-white border rounded-xl overflow-hidden transition-all ${open ? 'border-[#2563EB] shadow-sm' : 'border-gray-200 hover:border-slate-300'}`}>
-      {/* Question row — click to toggle */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-4 px-5 py-4 text-left min-h-[60px] group"
@@ -43,7 +43,6 @@ function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boole
         </svg>
       </button>
 
-      {/* Inline answer */}
       {open && (
         <div className="px-5 pb-5 border-t border-blue-50">
           <div
@@ -71,9 +70,33 @@ function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boole
   )
 }
 
-export function FAQHub({ items, categories }: { items: QAItem[]; categories: string[] }) {
+export function FAQHub() {
+  const [items, setItems] = useState<QAItem[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+
+  useEffect(() => {
+    ;(async () => {
+      const supabase = createClient()
+      const [{ data: itemsData }, { data: catsData }] = await Promise.all([
+        supabase
+          .from('qa_items')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('qa_categories')
+          .select('name')
+          .order('position', { ascending: true })
+          .order('created_at', { ascending: true }),
+      ])
+      setItems(itemsData ?? [])
+      setCategories((catsData ?? []).map((c) => c.name))
+      setLoading(false)
+    })()
+  }, [])
 
   const filtered = items.filter((item) => {
     const matchSearch =
@@ -84,8 +107,37 @@ export function FAQHub({ items, categories }: { items: QAItem[]; categories: str
     return matchSearch && matchCat
   })
 
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-xl h-[60px] animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+          </svg>
+        </div>
+        <p className="text-slate-400 text-sm">No questions yet — check back soon.</p>
+      </div>
+    )
+  }
+
   return (
     <div>
+      {/* Item count */}
+      <p className="text-sm text-slate-300 text-center mb-8">
+        {items.length} question{items.length !== 1 ? 's' : ''}
+      </p>
+
       {/* Search */}
       <div className="relative mb-5">
         <svg

@@ -1,36 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { FAQHub } from './FAQHub'
 import type { Metadata } from 'next'
-
-export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Help Center — AVProposal',
   description: 'Find answers to common questions about AVProposal.',
 }
 
-export default async function FAQPage() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
-
-  const [{ data: items }, { data: categoriesData }] = await Promise.all([
-    supabase
-      .from('qa_items')
-      .select('*')
-      .eq('published', true)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('qa_categories')
-      .select('name')
-      .order('position', { ascending: true })
-      .order('created_at', { ascending: true }),
-  ])
-
-  const allCategories = (categoriesData ?? []).map((c) => c.name)
-
+export default function FAQPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
@@ -77,24 +54,9 @@ export default async function FAQPage() {
           <p className="text-slate-400 text-lg">
             Find answers to common questions about AVProposal
           </p>
-          {items && items.length > 0 && (
-            <p className="text-sm text-slate-300 mt-2">{items.length} question{items.length !== 1 ? 's' : ''}</p>
-          )}
         </div>
 
-        {items && items.length > 0 ? (
-          <FAQHub items={items} categories={allCategories} />
-        ) : (
-          <div className="text-center py-20">
-            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-              </svg>
-            </div>
-            <p className="text-slate-400 text-sm">No questions yet — check back soon.</p>
-          </div>
-        )}
+        <FAQHub />
 
         {/* Still need help CTA */}
         <div className="mt-16 bg-white border border-gray-200 rounded-2xl p-8 text-center">
