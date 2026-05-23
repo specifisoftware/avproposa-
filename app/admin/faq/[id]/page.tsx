@@ -21,7 +21,6 @@ export default function FAQEditorPage() {
   const [slug, setSlug] = useState('')
   const [answer, setAnswer] = useState('')
   const [category, setCategory] = useState('')
-  const [position, setPosition] = useState(0)
   const [published, setPublished] = useState(true)
 
   useEffect(() => {
@@ -38,7 +37,6 @@ export default function FAQEditorPage() {
       setSlug(data.slug)
       setAnswer(data.answer)
       setCategory(data.category ?? '')
-      setPosition(data.position ?? 0)
       setPublished(data.published)
       setLoading(false)
     })()
@@ -62,7 +60,6 @@ export default function FAQEditorPage() {
       slug: slug.trim(),
       answer: answer.trim(),
       category: category.trim() || null,
-      position,
       published,
       updated_at: new Date().toISOString(),
     }
@@ -157,28 +154,15 @@ export default function FAQEditorPage() {
           </div>
         </div>
 
-        {/* Category & Position */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="General, Billing, Setup…"
-              className="w-full text-sm text-[#0F172A] border-0 outline-none placeholder:text-slate-200 bg-transparent"
-            />
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Display order</label>
-            <input
-              type="number"
-              value={position}
-              onChange={(e) => setPosition(Number(e.target.value))}
-              min={0}
-              className="w-full text-sm text-[#0F172A] border-0 outline-none bg-transparent"
-            />
-            <p className="text-[10px] text-slate-300 mt-1">Lower = appears first</p>
-          </div>
+        {/* Category */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
+          <input
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="General, Billing, Setup…"
+            className="w-full text-sm text-[#0F172A] border-0 outline-none placeholder:text-slate-200 bg-transparent"
+          />
         </div>
 
         {/* Answer */}

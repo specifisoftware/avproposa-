@@ -20,7 +20,6 @@ export default async function FAQPage() {
     .from('qa_items')
     .select('*')
     .eq('published', true)
-    .order('position', { ascending: true })
     .order('created_at', { ascending: false })
 
   return (

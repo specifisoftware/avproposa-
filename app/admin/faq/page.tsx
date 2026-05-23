@@ -16,7 +16,6 @@ export default function AdminFAQPage() {
       const { data } = await supabase
         .from('qa_items')
         .select('*')
-        .order('position', { ascending: true })
         .order('created_at', { ascending: false })
       setItems(data ?? [])
       setLoading(false)
@@ -81,7 +80,6 @@ export default function AdminFAQPage() {
             <tr className="bg-slate-50 border-b border-gray-200">
               <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Question</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Category</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell">Order</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Published</th>
               <th className="px-5 py-3" />
             </tr>
@@ -102,7 +100,6 @@ export default function AdminFAQPage() {
                     <span className="text-slate-300 text-xs">—</span>
                   )}
                 </td>
-                <td className="px-5 py-3.5 text-slate-400 text-xs hidden md:table-cell">{item.position}</td>
                 <td className="px-5 py-3.5">
                   <button
                     onClick={() => togglePublished(item.id, item.published)}
