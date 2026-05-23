@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import type { QAItem } from '@/types/qa'
 
+const PAGE_SIZE = 6
+
 function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boolean }) {
   const [open, setOpen] = useState(false)
 
@@ -70,74 +72,136 @@ function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boole
   )
 }
 
+function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return null
+
+  const pages: (number | 'gap')[] = []
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+      pages.push(i)
+    } else if (pages[pages.length - 1] !== 'gap') {
+      pages.push('gap')
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-1.5 mt-8">
+      <button
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-slate-500 hover:border-[#2563EB] hover:text-[#2563EB] disabled:opacity-30 disabled:cursor-not-allowed transition-colors bg-white"
+        aria-label="Previous page"
+      >
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      {pages.map((p, i) =>
+        p === 'gap' ? (
+          <span key={`gap-${i}`} className="w-9 h-9 flex items-center justify-center text-slate-300 text-sm">…</span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onChange(p)}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors border ${
+              p === page
+                ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                : 'bg-white text-slate-500 border-gray-200 hover:border-[#2563EB] hover:text-[#2563EB]'
+            }`}
+          >
+            {p}
+          </button>
+        )
+      )}
+
+      <button
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-slate-500 hover:border-[#2563EB] hover:text-[#2563EB] disabled:opacity-30 disabled:cursor-not-allowed transition-colors bg-white"
+        aria-label="Next page"
+      >
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 export function FAQHub() {
   const [items, setItems] = useState<QAItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [totalCount, setTotalCount] = useState(0)
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
+  // Debounce search input by 350ms
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(t)
+  }, [search])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch, activeCategory])
+
+  // Fetch categories once
   useEffect(() => {
     ;(async () => {
       const supabase = createClient()
-      const [{ data: itemsData }, { data: catsData }] = await Promise.all([
-        supabase
-          .from('qa_items')
-          .select('*')
-          .eq('published', true)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('qa_categories')
-          .select('name')
-          .order('position', { ascending: true })
-          .order('created_at', { ascending: true }),
-      ])
-      setItems(itemsData ?? [])
-      setCategories((catsData ?? []).map((c) => c.name))
-      setLoading(false)
+      const { data } = await supabase
+        .from('qa_categories')
+        .select('name')
+        .order('position', { ascending: true })
+        .order('created_at', { ascending: true })
+      setCategories((data ?? []).map((c) => c.name))
     })()
   }, [])
 
-  const filtered = items.filter((item) => {
-    const matchSearch =
-      !search.trim() ||
-      item.question.toLowerCase().includes(search.toLowerCase()) ||
-      item.answer.toLowerCase().includes(search.toLowerCase())
-    const matchCat = !activeCategory || item.category === activeCategory
-    return matchSearch && matchCat
-  })
+  // Fetch paginated items whenever page / search / category changes
+  useEffect(() => {
+    ;(async () => {
+      setLoading(true)
+      const supabase = createClient()
 
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-xl h-[60px] animate-pulse" />
-        ))}
-      </div>
-    )
-  }
+      let query = supabase
+        .from('qa_items')
+        .select('*', { count: 'exact' })
+        .eq('published', true)
+        .order('created_at', { ascending: false })
 
-  if (items.length === 0) {
-    return (
-      <div className="text-center py-20">
-        <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-          </svg>
-        </div>
-        <p className="text-slate-400 text-sm">No questions yet — check back soon.</p>
-      </div>
-    )
+      if (debouncedSearch.trim()) {
+        query = query.or(
+          `question.ilike.%${debouncedSearch.trim()}%,answer.ilike.%${debouncedSearch.trim()}%`
+        )
+      }
+      if (activeCategory) {
+        query = query.eq('category', activeCategory)
+      }
+
+      const from = (page - 1) * PAGE_SIZE
+      const { data, count } = await query.range(from, from + PAGE_SIZE - 1)
+
+      setItems(data ?? [])
+      setTotalCount(count ?? 0)
+      setLoading(false)
+    })()
+  }, [page, debouncedSearch, activeCategory])
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <div>
-      {/* Item count */}
-      <p className="text-sm text-slate-300 text-center mb-8">
-        {items.length} question{items.length !== 1 ? 's' : ''}
-      </p>
-
       {/* Search */}
       <div className="relative mb-5">
         <svg
@@ -168,13 +232,9 @@ export function FAQHub() {
             }`}
           >
             All
-            <span className={`ml-1.5 text-xs font-medium ${!activeCategory ? 'text-blue-200' : 'text-slate-300'}`}>
-              {items.length}
-            </span>
           </button>
 
           {categories.map((cat) => {
-            const count = items.filter((i) => i.category === cat).length
             const isActive = activeCategory === cat
             return (
               <button
@@ -187,29 +247,37 @@ export function FAQHub() {
                 }`}
               >
                 {cat}
-                <span className={`ml-1.5 text-xs font-medium ${isActive ? 'text-blue-200' : 'text-slate-300'}`}>
-                  {count}
-                </span>
               </button>
             )
           })}
         </div>
       )}
 
-      {/* Result count when searching */}
-      {search.trim() && (
-        <div className="flex items-center justify-between mb-4">
+      {/* Result meta */}
+      <div className="flex items-center justify-between mb-4 min-h-[20px]">
+        {!loading && (
           <p className="text-xs text-slate-400">
-            {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &ldquo;{search}&rdquo;
+            {debouncedSearch.trim()
+              ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${debouncedSearch.trim()}"`
+              : `${totalCount} question${totalCount !== 1 ? 's' : ''}`}
+            {totalPages > 1 && ` · page ${page} of ${totalPages}`}
           </p>
-          <button onClick={() => setSearch('')} className="text-xs text-[#2563EB] hover:underline">
+        )}
+        {debouncedSearch.trim() && (
+          <button onClick={() => setSearch('')} className="text-xs text-[#2563EB] hover:underline ml-auto">
             Clear
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Question list */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl h-[60px] animate-pulse" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <div className="text-center py-16">
           <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
@@ -220,15 +288,19 @@ export function FAQHub() {
           <p className="text-slate-400 text-sm">No questions found.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map((item) => (
-            <QuestionRow
-              key={item.id}
-              item={item}
-              showCategory={!activeCategory && categories.length > 0}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-2">
+            {items.map((item) => (
+              <QuestionRow
+                key={item.id}
+                item={item}
+                showCategory={!activeCategory && categories.length > 0}
+              />
+            ))}
+          </div>
+
+          <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
+        </>
       )}
     </div>
   )
