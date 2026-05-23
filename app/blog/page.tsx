@@ -9,13 +9,14 @@ export default async function BlogPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
 
-  let { data: posts, error: postsError } = await supabase
+  const { data: postsData, error: postsError } = await supabase
     .from('blog_posts')
     .select('id, title, slug, cover_image, created_at')
     .eq('published', true)
     .order('created_at', { ascending: false })
 
   // Fallback if cover_image column doesn't exist yet (migration pending)
+  let posts = postsData
   if (postsError) {
     const { data: fallback } = await supabase
       .from('blog_posts')

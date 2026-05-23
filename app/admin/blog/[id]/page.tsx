@@ -105,7 +105,8 @@ export default function BlogEditorPage() {
       // Retry without cover_image if the column doesn't exist yet (migration pending)
       if (errMsg(e).includes('cover_image')) {
         try {
-          const { cover_image: _, ...rest } = payload
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { cover_image: _ci, ...rest } = payload
           await trySave(rest as typeof payload)
           setError('Saved — but cover image skipped. Run migration 004 in Supabase SQL Editor.')
         } catch (e2) {
