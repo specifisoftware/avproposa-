@@ -21,7 +21,7 @@ export default async function FAQPage() {
     .select('*')
     .eq('published', true)
     .order('position', { ascending: true })
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-slate-50">
