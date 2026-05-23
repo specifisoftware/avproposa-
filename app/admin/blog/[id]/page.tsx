@@ -85,17 +85,32 @@ export default function BlogEditorPage() {
       published,
       updated_at: new Date().toISOString(),
     }
-    try {
+    const trySave = async (p: typeof payload) => {
       if (isNew) {
-        const { error } = await supabase.from('blog_posts').insert({ ...payload, author_id: user?.id ?? null })
+        const { error } = await supabase.from('blog_posts').insert({ ...p, author_id: user?.id ?? null })
         if (error) throw error
         router.replace('/admin/blog')
       } else {
-        const { error } = await supabase.from('blog_posts').update(payload).eq('id', id)
+        const { error } = await supabase.from('blog_posts').update(p).eq('id', id)
         if (error) throw error
       }
+    }
+
+    try {
+      await trySave(payload)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Save failed')
+      // Retry without cover_image if the column doesn't exist yet (migration pending)
+      if (e instanceof Error && e.message.includes('cover_image')) {
+        try {
+          const { cover_image: _, ...rest } = payload
+          await trySave(rest as typeof payload)
+          setError('Saved (cover image skipped — run migration 004 in Supabase)')
+        } catch (e2) {
+          setError(e2 instanceof Error ? e2.message : 'Save failed')
+        }
+      } else {
+        setError(e instanceof Error ? e.message : 'Save failed')
+      }
     } finally {
       setSaving(false)
     }

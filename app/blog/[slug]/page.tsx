@@ -29,12 +29,23 @@ export default async function BlogPostPage({ params }: Props) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
 
-  const { data: post } = await supabase
+  let { data: post, error: postError } = await supabase
     .from('blog_posts')
     .select('title, html_content, css_content, cover_image, created_at')
     .eq('slug', params.slug)
     .eq('published', true)
     .single()
+
+  // Fallback if cover_image column doesn't exist yet (migration pending)
+  if (postError && postError.code !== 'PGRST116') {
+    const { data: fallback } = await supabase
+      .from('blog_posts')
+      .select('title, html_content, css_content, created_at')
+      .eq('slug', params.slug)
+      .eq('published', true)
+      .single()
+    post = fallback ? { ...fallback, cover_image: null } : null
+  }
 
   if (!post) notFound()
 
