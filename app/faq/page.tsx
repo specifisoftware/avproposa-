@@ -16,11 +16,20 @@ export default async function FAQPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
 
-  const { data: items } = await supabase
-    .from('qa_items')
-    .select('*')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
+  const [{ data: items }, { data: categoriesData }] = await Promise.all([
+    supabase
+      .from('qa_items')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('qa_categories')
+      .select('name')
+      .order('position', { ascending: true })
+      .order('created_at', { ascending: true }),
+  ])
+
+  const allCategories = (categoriesData ?? []).map((c) => c.name)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -74,7 +83,7 @@ export default async function FAQPage() {
         </div>
 
         {items && items.length > 0 ? (
-          <FAQHub items={items} />
+          <FAQHub items={items} categories={allCategories} />
         ) : (
           <div className="text-center py-20">
             <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

@@ -71,13 +71,9 @@ function QuestionRow({ item, showCategory }: { item: QAItem; showCategory: boole
   )
 }
 
-export function FAQHub({ items }: { items: QAItem[] }) {
+export function FAQHub({ items, categories }: { items: QAItem[]; categories: string[] }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-
-  const categories = Array.from(
-    new Set(items.map((i) => i.category).filter(Boolean))
-  ) as string[]
 
   const filtered = items.filter((item) => {
     const matchSearch =

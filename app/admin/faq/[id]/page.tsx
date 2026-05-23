@@ -13,7 +13,7 @@ export default function FAQEditorPage() {
   const isNew = id === 'new'
   const router = useRouter()
 
-  const [loading, setLoading] = useState(!isNew)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -22,11 +22,22 @@ export default function FAQEditorPage() {
   const [answer, setAnswer] = useState('')
   const [category, setCategory] = useState('')
   const [published, setPublished] = useState(true)
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([])
 
   useEffect(() => {
-    if (isNew) return
     ;(async () => {
       const supabase = createClient()
+
+      // Always load categories
+      const { data: cats } = await supabase
+        .from('qa_categories')
+        .select('name')
+        .order('position', { ascending: true })
+        .order('created_at', { ascending: true })
+      setCategoryOptions((cats ?? []).map((c) => c.name))
+
+      if (isNew) { setLoading(false); return }
+
       const { data, error: fetchError } = await supabase
         .from('qa_items')
         .select('*')
@@ -156,13 +167,29 @@ export default function FAQEditorPage() {
 
         {/* Category */}
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
-          <input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="General, Billing, Setup…"
-            className="w-full text-sm text-[#0F172A] border-0 outline-none placeholder:text-slate-200 bg-transparent"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Category</label>
+            <Link href="/admin/faq/categories" className="text-[10px] text-[#2563EB] hover:underline">
+              Manage categories →
+            </Link>
+          </div>
+          {categoryOptions.length > 0 ? (
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full text-sm text-[#0F172A] border-0 outline-none bg-transparent cursor-pointer"
+            >
+              <option value="">— No category —</option>
+              {categoryOptions.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-xs text-slate-300">
+              No categories yet.{' '}
+              <Link href="/admin/faq/categories" className="text-[#2563EB] hover:underline">Add one first →</Link>
+            </p>
+          )}
         </div>
 
         {/* Answer */}
