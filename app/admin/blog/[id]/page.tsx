@@ -24,6 +24,8 @@ export default function BlogEditorPage() {
   const [slug, setSlug] = useState('')
   const [html, setHtml] = useState('')
   const [css, setCss] = useState('')
+  const [coverImage, setCoverImage] = useState('')
+  const [coverUploading, setCoverUploading] = useState(false)
   const [published, setPublished] = useState(false)
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function BlogEditorPage() {
       setSlug(data.slug)
       setHtml(data.html_content)
       setCss(data.css_content)
+      setCoverImage(data.cover_image ?? '')
       setPublished(data.published)
       setLoading(false)
     })()
@@ -48,6 +51,22 @@ export default function BlogEditorPage() {
   const handleTitleChange = (v: string) => {
     setTitle(v)
     if (isNew) setSlug(slugify(v))
+  }
+
+  const handleCoverUpload = async (file: File) => {
+    setCoverUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (json.url) setCoverImage(json.url)
+      else setError(json.error ?? 'Upload failed')
+    } catch {
+      setError('Upload failed')
+    } finally {
+      setCoverUploading(false)
+    }
   }
 
   const handleSave = async () => {
@@ -62,6 +81,7 @@ export default function BlogEditorPage() {
       slug: slug.trim(),
       html_content: html,
       css_content: css,
+      cover_image: coverImage.trim() || null,
       published,
       updated_at: new Date().toISOString(),
     }
@@ -163,6 +183,44 @@ export default function BlogEditorPage() {
               placeholder="post-slug"
               className="text-xs text-slate-500 border-0 outline-none bg-transparent font-mono flex-1 min-w-0"
             />
+          </div>
+        </div>
+
+        {/* Cover Image */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cover Image</p>
+          {coverImage && (
+            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setCoverImage('')}
+                className="absolute top-2 right-2 bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 rounded-lg p-1.5 text-xs transition-colors"
+                title="Remove cover image"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              placeholder="Paste image URL…"
+              className="flex-1 min-w-0 text-sm border border-gray-200 rounded-lg px-3 py-2 text-slate-700 outline-none focus:border-[#2563EB] transition-colors placeholder:text-slate-300"
+            />
+            <label className={`shrink-0 cursor-pointer px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${coverUploading ? 'bg-slate-50 text-slate-300 border-gray-100' : 'bg-slate-50 text-slate-600 border-gray-200 hover:border-[#2563EB] hover:text-[#2563EB]'}`}>
+              {coverUploading ? 'Uploading…' : 'Upload'}
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                disabled={coverUploading}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f) }}
+              />
+            </label>
           </div>
         </div>
 

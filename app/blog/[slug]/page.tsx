@@ -31,7 +31,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   const { data: post } = await supabase
     .from('blog_posts')
-    .select('title, html_content, css_content, created_at')
+    .select('title, html_content, css_content, cover_image, created_at')
     .eq('slug', params.slug)
     .eq('published', true)
     .single()
@@ -70,6 +70,18 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </div>
       </header>
+
+      {/* Cover image hero */}
+      {post.cover_image && (
+        <div className="w-full h-56 sm:h-72 md:h-96 overflow-hidden bg-slate-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
 
       {/* Post header */}
       <div className="bg-white border-b border-gray-100">

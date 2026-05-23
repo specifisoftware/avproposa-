@@ -4,6 +4,7 @@ export type BlogPost = {
   slug: string
   html_content: string
   css_content: string
+  cover_image: string | null
   published: boolean
   created_at: string
   updated_at: string

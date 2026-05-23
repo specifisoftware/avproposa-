@@ -11,7 +11,7 @@ export default async function BlogPage() {
 
   const { data: posts } = await supabase
     .from('blog_posts')
-    .select('id, title, slug, created_at')
+    .select('id, title, slug, cover_image, created_at')
     .eq('published', true)
     .order('created_at', { ascending: false })
 
@@ -59,24 +59,37 @@ export default async function BlogPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post, i) => (
               <Link key={post.id} href={`/blog/${post.slug}`} className="block group">
-                <article className="h-full border border-gray-200 rounded-2xl p-6 hover:border-[#2563EB] hover:shadow-md transition-all flex flex-col">
-                  {/* Color accent bar — cycles through a few colours */}
-                  <div
-                    className="w-10 h-1 rounded-full mb-4"
-                    style={{ background: ['#2563EB', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0891B2'][i % 6] }}
-                  />
-                  <h2 className="text-base font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-3 leading-snug flex-1">
-                    {post.title}
-                  </h2>
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-xs text-slate-400">
-                      {new Date(post.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                      })}
-                    </p>
-                    <span className="text-xs font-medium text-[#2563EB] group-hover:underline">
-                      Read →
-                    </span>
+                <article className="h-full border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2563EB] hover:shadow-md transition-all flex flex-col">
+                  {/* Cover image or colour accent bar */}
+                  {post.cover_image ? (
+                    <div className="w-full h-44 overflow-hidden bg-slate-100 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={post.cover_image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full h-1.5 shrink-0"
+                      style={{ background: ['#2563EB', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0891B2'][i % 6] }}
+                    />
+                  )}
+                  <div className="p-6 flex flex-col flex-1">
+                    <h2 className="text-base font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-3 leading-snug flex-1">
+                      {post.title}
+                    </h2>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-xs text-slate-400">
+                        {new Date(post.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric', month: 'short', day: 'numeric',
+                        })}
+                      </p>
+                      <span className="text-xs font-medium text-[#2563EB] group-hover:underline">
+                        Read →
+                      </span>
+                    </div>
                   </div>
                 </article>
               </Link>
