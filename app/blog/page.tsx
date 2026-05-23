@@ -46,6 +46,7 @@ export default async function BlogPage() {
             <Link href="/#features" className="hover:text-[#0F172A] transition-colors">Features</Link>
             <Link href="/#how-it-works" className="hover:text-[#0F172A] transition-colors">How it works</Link>
             <Link href="/blog" className="text-[#0F172A] font-semibold">Blog</Link>
+            <Link href="/faq" className="hover:text-[#0F172A] transition-colors">Help</Link>
           </nav>
 
           <div className="flex items-center gap-2">

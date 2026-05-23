@@ -98,6 +98,7 @@ export default function HomePage() {
             <a href="#features" className="hover:text-[#0F172A] transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-[#0F172A] transition-colors">How it works</a>
             <Link href="/blog" className="hover:text-[#0F172A] transition-colors">Blog</Link>
+            <Link href="/faq" className="hover:text-[#0F172A] transition-colors">Help</Link>
           </nav>
 
           {/* Auth buttons */}
@@ -266,6 +267,8 @@ export default function HomePage() {
             © {new Date().getFullYear()} AVProposal. Built for AV professionals.
           </p>
           <div className="flex gap-5 text-xs text-slate-400">
+            <Link href="/blog" className="hover:text-slate-600 transition-colors">Blog</Link>
+            <Link href="/faq" className="hover:text-slate-600 transition-colors">Help</Link>
             <Link href="/auth?tab=login" className="hover:text-slate-600 transition-colors">Sign In</Link>
             <Link href="/auth?tab=register" className="hover:text-slate-600 transition-colors">Register</Link>
           </div>

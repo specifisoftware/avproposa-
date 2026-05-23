@@ -73,6 +73,9 @@ export default async function BlogPostPage({ params }: Props) {
             <Link href="/blog" className="text-sm text-slate-500 hover:text-[#0F172A] transition-colors font-medium">
               ← Blog
             </Link>
+            <Link href="/faq" className="hidden sm:block text-sm text-slate-500 hover:text-[#0F172A] transition-colors font-medium">
+              Help
+            </Link>
             <Link
               href="/auth?tab=register"
               className="hidden sm:block px-4 py-2 text-sm font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded-lg transition-colors"
