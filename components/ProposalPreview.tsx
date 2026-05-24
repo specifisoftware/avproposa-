@@ -123,7 +123,7 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                     <thead>
                       <tr>
-                        {hasAnyPhoto && <th style={{ width: '64px', borderBottom: '2px solid #e2e8f0' }} />}
+                        {hasAnyPhoto && <th style={{ width: '212px', borderBottom: '2px solid #e2e8f0' }} />}
                         <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', letterSpacing: '0.05em' }}>ITEM</th>
                         <th style={{ textAlign: 'center', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', width: '60px' }}>QTY</th>
                         <th style={{ textAlign: 'right', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', width: '100px' }}>UNIT</th>
@@ -144,10 +144,10 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                                     src={item.imageUrl}
                                     alt={item.name}
                                     crossOrigin="anonymous"
-                                    style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
+                                    style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
                                   />
                                 ) : (
-                                  <div style={{ width: '52px', height: '52px', background: '#f1f5f9', borderRadius: '6px' }} />
+                                  <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '6px' }} />
                                 )}
                               </td>
                             )}
@@ -335,7 +335,7 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ background: '#f1f5f9' }}>
-                          {hasAnyPhoto && <th style={{ width: '66px' }} />}
+                          {hasAnyPhoto && <th style={{ width: '212px' }} />}
                           <th style={{ textAlign: 'left', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', letterSpacing: '0.06em' }}>ITEM</th>
                           <th style={{ textAlign: 'center', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', width: '60px' }}>QTY</th>
                           <th style={{ textAlign: 'right', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', width: '100px' }}>UNIT PRICE</th>
@@ -353,10 +353,10 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                                     src={item.imageUrl}
                                     alt={item.name}
                                     crossOrigin="anonymous"
-                                    style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                    style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
                                   />
                                 ) : (
-                                  <div style={{ width: '52px', height: '52px', background: '#f1f5f9', borderRadius: '8px' }} />
+                                  <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '8px' }} />
                                 )}
                               </td>
                             )}
