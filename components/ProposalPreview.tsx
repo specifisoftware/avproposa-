@@ -139,13 +139,15 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                             {hasAnyPhoto && (
                               <td style={{ padding: '6px 6px 6px 10px', borderBottom: border, background: bg }}>
                                 {item.imageUrl ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={item.imageUrl}
-                                    alt={item.name}
-                                    crossOrigin="anonymous"
-                                    style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '6px', display: 'block', background: '#f8fafc' }}
-                                  />
+                                  <div style={{ width: '200px', height: '200px', background: '#f8fafc', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={item.imageUrl}
+                                      alt={item.name}
+                                      crossOrigin="anonymous"
+                                      style={{ maxWidth: '200px', maxHeight: '200px', width: 'auto', height: 'auto', display: 'block' }}
+                                    />
+                                  </div>
                                 ) : (
                                   <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '6px' }} />
                                 )}
@@ -348,13 +350,15 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                             {hasAnyPhoto && (
                               <td style={{ padding: '7px 6px 7px 10px', borderTop: '1px solid #f1f5f9' }}>
                                 {item.imageUrl ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={item.imageUrl}
-                                    alt={item.name}
-                                    crossOrigin="anonymous"
-                                    style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '8px', display: 'block', background: '#f8fafc' }}
-                                  />
+                                  <div style={{ width: '200px', height: '200px', background: '#f8fafc', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={item.imageUrl}
+                                      alt={item.name}
+                                      crossOrigin="anonymous"
+                                      style={{ maxWidth: '200px', maxHeight: '200px', width: 'auto', height: 'auto', display: 'block' }}
+                                    />
+                                  </div>
                                 ) : (
                                   <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '8px' }} />
                                 )}
