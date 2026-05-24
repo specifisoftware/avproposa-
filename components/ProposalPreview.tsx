@@ -144,7 +144,7 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                                     src={item.imageUrl}
                                     alt={item.name}
                                     crossOrigin="anonymous"
-                                    style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
+                                    style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '6px', display: 'block', background: '#f8fafc' }}
                                   />
                                 ) : (
                                   <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '6px' }} />
@@ -353,7 +353,7 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                                     src={item.imageUrl}
                                     alt={item.name}
                                     crossOrigin="anonymous"
-                                    style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                    style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '8px', display: 'block', background: '#f8fafc' }}
                                   />
                                 ) : (
                                   <div style={{ width: '200px', height: '200px', background: '#f1f5f9', borderRadius: '8px' }} />
