@@ -12,6 +12,8 @@ export interface Room {
   equipment: EquipmentItem[]
 }
 
+export type ProposalTemplate = 'classic' | 'modern'
+
 export interface ProposalData {
   clientName: string
   integratorName: string
@@ -22,6 +24,7 @@ export interface ProposalData {
   rooms: Room[]
   notes: string
   taxRate: number
+  template: ProposalTemplate
 }
 
 export const ROOM_TYPES = [
@@ -61,5 +64,6 @@ export function makeDefaultProposal(): ProposalData {
     rooms: [],
     notes: '',
     taxRate: 10,
+    template: 'classic',
   }
 }
