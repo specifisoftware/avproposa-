@@ -6,7 +6,7 @@ AV (Audio/Video) proposal generator. Users log in, fill a form, and download a P
 
 - **Next.js 14** — App Router, TypeScript, Tailwind CSS
 - **Supabase** (`@supabase/ssr`) — auth + proposals/blog/faq/banners tables
-- **Cloudflare R2** — company logo storage (S3-compatible)
+- **Cloudflare R2** — company logo + equipment photo storage (S3-compatible)
 - **html2canvas + jsPDF** — client-side PDF generation
 
 ## Project structure
@@ -38,14 +38,14 @@ app/
   admin/faq/categories/page.tsx # FAQ category management
 components/
   Navbar.tsx                  # Top bar — logo, user email, daily limit badge, logout
-  ProposalPreview.tsx         # Right-side live preview (also captured for PDF)
-  RoomCard.tsx                # Per-room card with dynamic equipment rows
+  ProposalPreview.tsx         # Right-side live preview (also captured for PDF); renders Classic or Modern template
+  RoomCard.tsx                # Per-room card with equipment rows + per-item photo upload
   BlogIframe.tsx              # Renders blog post HTML+CSS in a sandboxed iframe
   SideBanner.tsx              # Displays an R2-hosted banner image with optional link
 lib/
   supabase.ts                 # createClient() — browser Supabase client via @supabase/ssr
 types/
-  proposal.ts                 # ProposalData, Room, EquipmentItem types + helpers
+  proposal.ts                 # ProposalData, Room, EquipmentItem, ProposalTemplate, CURRENCIES + helpers
   blog.ts                     # BlogPost type
   qa.ts                       # QAItem type
 middleware.ts                 # Auth guard: /proposal and /admin require session
@@ -105,7 +105,9 @@ RLS policies are enabled — users can only read/insert their own rows. Admin ro
 - Public Development URL enabled → `https://pub-80a2efeab35a40eaa2cf45b2bd84fb0e.r2.dev`
 - API Token permissions: Object Read & Write on `avproposal` bucket
 
-Logo uploads use base64 for instant local preview, then replace with R2 CDN URL after background upload completes. Banner images are also stored in R2.
+Logo and equipment photo uploads use base64 for instant local preview, then upload to R2 in the background. Banner images are also stored in R2.
+
+**html2canvas caveat:** `objectFit` CSS is not supported by html2canvas. For images that must render correctly in the PDF, use a fixed-size flex wrapper (`display:flex, alignItems:center, justifyContent:center`) with `maxWidth/maxHeight` on the `<img>` instead of `objectFit`.
 
 ## Daily limit logic
 
@@ -118,6 +120,31 @@ Logo uploads use base64 for instant local preview, then replace with R2 CDN URL 
 
 html2canvas captures `#proposal-preview` div at 2× scale, jsPDF converts to A4.
 Multi-page support: canvas is split across pages if content exceeds one page height.
+
+The preview is cloned into an off-screen container at exactly 794 px (A4 at 96 dpi) before capture so scroll position and panel width never affect the output.
+
+## Proposal templates
+
+Two templates selectable per proposal in the form:
+
+- **Classic** — white background, blue/purple gradient accent line, blue-bordered "Prepared For" block, dark navy Grand Total box.
+- **Modern** — full-width dark navy header (logo left, PROPOSAL right), blue/purple gradient bar, "Prepared For" in a blue-tinted card, dark room header rows with cyan totals, blue gradient Grand Total box, signature lines, dark footer.
+
+`ProposalPreview.tsx` exports a single default component that switches between `ClassicPreview` and `ModernPreview` based on `data.template`.
+
+Template is stored in `ProposalData.template: ProposalTemplate` ('classic' | 'modern').
+
+## Equipment photos
+
+Each `EquipmentItem` has an optional `imageUrl?: string`. In `RoomCard`, a camera-icon button opens a file picker per row; the image is previewed instantly via base64 and uploaded to R2 in the background.
+
+In the preview/PDF, photos render as **200×200 px** flex-wrapper + `maxWidth/maxHeight` (not `objectFit`) so they display correctly in html2canvas. The photo column is only shown when at least one item in any room has a photo (`hasAnyPhoto` flag).
+
+## Currency
+
+`ProposalData.currency: string` (default `'USD'`). The `CURRENCIES` constant in `types/proposal.ts` lists the supported options: USD, EUR, GBP, AED, AZN, CAD, AUD, SAR, QAR, TRY.
+
+`formatCurrency(amount, currency?)` uses `Intl.NumberFormat` with the selected currency code. All prices in the form sidebar, live preview, and PDF reflect the selected currency.
 
 ## Admin panel
 
