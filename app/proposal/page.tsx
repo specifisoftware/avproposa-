@@ -10,6 +10,7 @@ import {
   makeDefaultProposal,
   calcSubtotal,
   formatCurrency,
+  CURRENCIES,
 } from '@/types/proposal'
 import Navbar from '@/components/Navbar'
 import ProposalPreview from '@/components/ProposalPreview'
@@ -341,6 +342,18 @@ export default function ProposalPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
                   />
                 </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">Currency</label>
+                  <select
+                    value={proposal.currency}
+                    onChange={(e) => set('currency', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent bg-white"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </Card>
 
@@ -537,6 +550,7 @@ export default function ProposalPage() {
                   <RoomCard
                     key={room.id}
                     room={room}
+                    currency={proposal.currency}
                     onUpdate={updateRoom}
                     onDelete={deleteRoom}
                   />
@@ -568,7 +582,7 @@ export default function ProposalPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Subtotal</span>
-                  <span className="font-medium text-slate-700 tabular-nums">{formatCurrency(subtotal)}</span>
+                  <span className="font-medium text-slate-700 tabular-nums">{formatCurrency(subtotal, proposal.currency)}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
@@ -586,12 +600,12 @@ export default function ProposalPage() {
                       <span className="px-2 py-1 bg-gray-50 text-slate-400 border-l border-gray-300 text-xs">%</span>
                     </div>
                   </div>
-                  <span className="font-medium text-slate-700 tabular-nums">{formatCurrency(taxAmount)}</span>
+                  <span className="font-medium text-slate-700 tabular-nums">{formatCurrency(taxAmount, proposal.currency)}</span>
                 </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between items-baseline">
                   <span className="font-semibold text-[#0F172A]">Grand Total</span>
-                  <span className="font-bold text-[#0F172A] text-xl tabular-nums">{formatCurrency(grandTotal)}</span>
+                  <span className="font-bold text-[#0F172A] text-xl tabular-nums">{formatCurrency(grandTotal, proposal.currency)}</span>
                 </div>
               </div>
             </Card>

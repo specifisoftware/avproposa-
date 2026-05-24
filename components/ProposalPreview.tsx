@@ -7,9 +7,12 @@ interface ProposalPreviewProps {
 // ─── Classic Template ────────────────────────────────────────────────────────
 
 function ClassicPreview({ data }: ProposalPreviewProps) {
+  const cur = data.currency || 'USD'
   const subtotal = calcSubtotal(data.rooms)
   const taxAmount = subtotal * (data.taxRate / 100)
   const grandTotal = subtotal + taxAmount
+
+  const hasAnyPhoto = data.rooms.some((r) => r.equipment.some((e) => e.imageUrl))
 
   return (
     <div
@@ -112,7 +115,7 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                     )}
                   </div>
                   <span style={{ fontSize: '13px', fontWeight: 700, color: '#2563EB' }}>
-                    {formatCurrency(roomTotal)}
+                    {formatCurrency(roomTotal, cur)}
                   </span>
                 </div>
 
@@ -120,6 +123,7 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                     <thead>
                       <tr>
+                        {hasAnyPhoto && <th style={{ width: '44px', borderBottom: '2px solid #e2e8f0' }} />}
                         <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', letterSpacing: '0.05em' }}>ITEM</th>
                         <th style={{ textAlign: 'center', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', width: '60px' }}>QTY</th>
                         <th style={{ textAlign: 'right', padding: '7px 10px', fontSize: '10px', fontWeight: 700, color: '#64748b', borderBottom: '2px solid #e2e8f0', width: '100px' }}>UNIT</th>
@@ -127,14 +131,33 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
                       </tr>
                     </thead>
                     <tbody>
-                      {room.equipment.map((item, i) => (
-                        <tr key={item.id}>
-                          <td style={{ padding: '8px 10px', color: '#334155', borderBottom: `1px solid ${i % 2 === 0 ? '#f1f5f9' : 'transparent'}`, background: i % 2 === 1 ? '#fafafa' : '#fff' }}>{item.name || '—'}</td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', color: '#475569', borderBottom: `1px solid ${i % 2 === 0 ? '#f1f5f9' : 'transparent'}`, background: i % 2 === 1 ? '#fafafa' : '#fff' }}>{item.qty}</td>
-                          <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569', borderBottom: `1px solid ${i % 2 === 0 ? '#f1f5f9' : 'transparent'}`, background: i % 2 === 1 ? '#fafafa' : '#fff' }}>{formatCurrency(item.unitPrice)}</td>
-                          <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: '#0F172A', borderBottom: `1px solid ${i % 2 === 0 ? '#f1f5f9' : 'transparent'}`, background: i % 2 === 1 ? '#fafafa' : '#fff' }}>{formatCurrency(item.qty * item.unitPrice)}</td>
-                        </tr>
-                      ))}
+                      {room.equipment.map((item, i) => {
+                        const bg = i % 2 === 1 ? '#fafafa' : '#fff'
+                        const border = `1px solid ${i % 2 === 0 ? '#f1f5f9' : 'transparent'}`
+                        return (
+                          <tr key={item.id}>
+                            {hasAnyPhoto && (
+                              <td style={{ padding: '6px 6px 6px 10px', borderBottom: border, background: bg }}>
+                                {item.imageUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    crossOrigin="anonymous"
+                                    style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', display: 'block' }}
+                                  />
+                                ) : (
+                                  <div style={{ width: '32px', height: '32px', background: '#f1f5f9', borderRadius: '4px' }} />
+                                )}
+                              </td>
+                            )}
+                            <td style={{ padding: '8px 10px', color: '#334155', borderBottom: border, background: bg }}>{item.name || '—'}</td>
+                            <td style={{ padding: '8px 10px', textAlign: 'center', color: '#475569', borderBottom: border, background: bg }}>{item.qty}</td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569', borderBottom: border, background: bg }}>{formatCurrency(item.unitPrice, cur)}</td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: '#0F172A', borderBottom: border, background: bg }}>{formatCurrency(item.qty * item.unitPrice, cur)}</td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 )}
@@ -167,16 +190,16 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
             <div style={{ padding: '14px 20px', background: '#f8fafc' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
                 <span style={{ color: '#64748b' }}>Subtotal</span>
-                <span style={{ fontWeight: 500, color: '#334155' }}>{formatCurrency(subtotal)}</span>
+                <span style={{ fontWeight: 500, color: '#334155' }}>{formatCurrency(subtotal, cur)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                 <span style={{ color: '#64748b' }}>Tax ({data.taxRate}%)</span>
-                <span style={{ fontWeight: 500, color: '#334155' }}>{formatCurrency(taxAmount)}</span>
+                <span style={{ fontWeight: 500, color: '#334155' }}>{formatCurrency(taxAmount, cur)}</span>
               </div>
             </div>
             <div style={{ padding: '14px 20px', background: '#0F172A', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 700, color: '#ffffff', fontSize: '13px' }}>Grand Total</span>
-              <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '20px' }}>{formatCurrency(grandTotal)}</span>
+              <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '20px' }}>{formatCurrency(grandTotal, cur)}</span>
             </div>
           </div>
         </div>
@@ -194,9 +217,12 @@ function ClassicPreview({ data }: ProposalPreviewProps) {
 // ─── Modern Template ─────────────────────────────────────────────────────────
 
 function ModernPreview({ data }: ProposalPreviewProps) {
+  const cur = data.currency || 'USD'
   const subtotal = calcSubtotal(data.rooms)
   const taxAmount = subtotal * (data.taxRate / 100)
   const grandTotal = subtotal + taxAmount
+
+  const hasAnyPhoto = data.rooms.some((r) => r.equipment.some((e) => e.imageUrl))
 
   return (
     <div
@@ -289,7 +315,6 @@ function ModernPreview({ data }: ProposalPreviewProps) {
               const roomTotal = room.equipment.reduce((acc, item) => acc + item.qty * item.unitPrice, 0)
               return (
                 <div key={room.id} style={{ marginBottom: idx < data.rooms.length - 1 ? '28px' : 0, borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                  {/* Room header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1e293b', padding: '12px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>
@@ -302,7 +327,7 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                       )}
                     </div>
                     <span style={{ fontSize: '14px', fontWeight: 800, color: '#38bdf8' }}>
-                      {formatCurrency(roomTotal)}
+                      {formatCurrency(roomTotal, cur)}
                     </span>
                   </div>
 
@@ -310,6 +335,7 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ background: '#f1f5f9' }}>
+                          {hasAnyPhoto && <th style={{ width: '48px' }} />}
                           <th style={{ textAlign: 'left', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', letterSpacing: '0.06em' }}>ITEM</th>
                           <th style={{ textAlign: 'center', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', width: '60px' }}>QTY</th>
                           <th style={{ textAlign: 'right', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#475569', width: '100px' }}>UNIT PRICE</th>
@@ -319,10 +345,25 @@ function ModernPreview({ data }: ProposalPreviewProps) {
                       <tbody>
                         {room.equipment.map((item, i) => (
                           <tr key={item.id} style={{ background: i % 2 === 0 ? '#ffffff' : '#fafafa' }}>
+                            {hasAnyPhoto && (
+                              <td style={{ padding: '7px 6px 7px 10px', borderTop: '1px solid #f1f5f9' }}>
+                                {item.imageUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    crossOrigin="anonymous"
+                                    style={{ width: '34px', height: '34px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
+                                  />
+                                ) : (
+                                  <div style={{ width: '34px', height: '34px', background: '#f1f5f9', borderRadius: '6px' }} />
+                                )}
+                              </td>
+                            )}
                             <td style={{ padding: '9px 16px', color: '#334155', borderTop: '1px solid #f1f5f9' }}>{item.name || '—'}</td>
                             <td style={{ padding: '9px 16px', textAlign: 'center', color: '#64748b', borderTop: '1px solid #f1f5f9' }}>{item.qty}</td>
-                            <td style={{ padding: '9px 16px', textAlign: 'right', color: '#64748b', borderTop: '1px solid #f1f5f9' }}>{formatCurrency(item.unitPrice)}</td>
-                            <td style={{ padding: '9px 16px', textAlign: 'right', fontWeight: 700, color: '#0F172A', borderTop: '1px solid #f1f5f9' }}>{formatCurrency(item.qty * item.unitPrice)}</td>
+                            <td style={{ padding: '9px 16px', textAlign: 'right', color: '#64748b', borderTop: '1px solid #f1f5f9' }}>{formatCurrency(item.unitPrice, cur)}</td>
+                            <td style={{ padding: '9px 16px', textAlign: 'right', fontWeight: 700, color: '#0F172A', borderTop: '1px solid #f1f5f9' }}>{formatCurrency(item.qty * item.unitPrice, cur)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -359,16 +400,16 @@ function ModernPreview({ data }: ProposalPreviewProps) {
             <div style={{ padding: '18px 22px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}>
                 <span style={{ color: '#64748b' }}>Subtotal</span>
-                <span style={{ fontWeight: 600, color: '#334155' }}>{formatCurrency(subtotal)}</span>
+                <span style={{ fontWeight: 600, color: '#334155' }}>{formatCurrency(subtotal, cur)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                 <span style={{ color: '#64748b' }}>Tax ({data.taxRate}%)</span>
-                <span style={{ fontWeight: 600, color: '#334155' }}>{formatCurrency(taxAmount)}</span>
+                <span style={{ fontWeight: 600, color: '#334155' }}>{formatCurrency(taxAmount, cur)}</span>
               </div>
             </div>
             <div style={{ padding: '20px 22px', background: 'linear-gradient(135deg, #1e40af, #2563EB)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Grand Total</span>
-              <span style={{ fontWeight: 900, color: '#ffffff', fontSize: '22px', letterSpacing: '-0.5px' }}>{formatCurrency(grandTotal)}</span>
+              <span style={{ fontWeight: 900, color: '#ffffff', fontSize: '22px', letterSpacing: '-0.5px' }}>{formatCurrency(grandTotal, cur)}</span>
             </div>
           </div>
         </div>

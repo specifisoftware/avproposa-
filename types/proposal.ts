@@ -3,6 +3,7 @@ export interface EquipmentItem {
   name: string
   qty: number
   unitPrice: number
+  imageUrl?: string
 }
 
 export interface Room {
@@ -13,6 +14,19 @@ export interface Room {
 }
 
 export type ProposalTemplate = 'classic' | 'modern'
+
+export const CURRENCIES = [
+  { code: 'USD', label: 'USD — US Dollar' },
+  { code: 'EUR', label: 'EUR — Euro' },
+  { code: 'GBP', label: 'GBP — British Pound' },
+  { code: 'AED', label: 'AED — UAE Dirham' },
+  { code: 'AZN', label: 'AZN — Azerbaijani Manat' },
+  { code: 'CAD', label: 'CAD — Canadian Dollar' },
+  { code: 'AUD', label: 'AUD — Australian Dollar' },
+  { code: 'SAR', label: 'SAR — Saudi Riyal' },
+  { code: 'QAR', label: 'QAR — Qatari Riyal' },
+  { code: 'TRY', label: 'TRY — Turkish Lira' },
+] as const
 
 export interface ProposalData {
   clientName: string
@@ -25,6 +39,7 @@ export interface ProposalData {
   notes: string
   taxRate: number
   template: ProposalTemplate
+  currency: string
 }
 
 export const ROOM_TYPES = [
@@ -49,8 +64,8 @@ export function calcSubtotal(rooms: Room[]): number {
   )
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
+export function formatCurrency(amount: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
 }
 
 export function makeDefaultProposal(): ProposalData {
@@ -65,5 +80,6 @@ export function makeDefaultProposal(): ProposalData {
     notes: '',
     taxRate: 10,
     template: 'classic',
+    currency: 'USD',
   }
 }
