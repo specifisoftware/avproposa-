@@ -5,7 +5,7 @@ AV (Audio/Video) proposal generator. Users log in, fill a form, and download a P
 ## Stack
 
 - **Next.js 14** — App Router, TypeScript, Tailwind CSS
-- **Supabase** (`@supabase/ssr`) — auth + proposals table
+- **Supabase** (`@supabase/ssr`) — auth + proposals/blog/faq/banners tables
 - **Cloudflare R2** — company logo storage (S3-compatible)
 - **html2canvas + jsPDF** — client-side PDF generation
 
@@ -13,22 +13,49 @@ AV (Audio/Video) proposal generator. Users log in, fill a form, and download a P
 
 ```
 app/
-  page.tsx              # Login / Register (public route)
-  proposal/page.tsx     # Main proposal form + live preview (protected)
-  api/upload/route.ts   # POST: upload logo to Cloudflare R2
-  api/proposals/route.ts# GET: count today's proposals | POST: record download
+  page.tsx                    # Marketing landing / home page (public)
+  auth/page.tsx               # Login / Register (public)
+  proposal/page.tsx           # Main proposal form + live preview (protected)
+  lander/page.tsx             # Placeholder lander page
+  blog/page.tsx               # Blog index (public)
+  blog/[slug]/page.tsx        # Blog post detail (public)
+  faq/page.tsx                # FAQ hub index (public)
+  faq/[slug]/page.tsx         # FAQ item detail (public)
+  faq/FAQHub.tsx              # FAQ hub client component
+  faq/[slug]/CopyLinkButton.tsx
+  sitemap.ts                  # Auto-generated sitemap
+  layout.tsx                  # Root layout
+  api/upload/route.ts         # POST: upload logo to Cloudflare R2
+  api/proposals/route.ts      # GET: count today's proposals | POST: record download
+  admin/layout.tsx            # Admin shell: auth guard (is_admin), sidebar nav
+  admin/page.tsx              # Redirect → /admin/users
+  admin/users/page.tsx        # User management
+  admin/blog/page.tsx         # Blog post list + create
+  admin/blog/[id]/page.tsx    # Blog post editor
+  admin/banners/page.tsx      # Side-banner management
+  admin/faq/page.tsx          # Q&A item list + create
+  admin/faq/[id]/page.tsx     # Q&A item editor
+  admin/faq/categories/page.tsx # FAQ category management
 components/
-  Navbar.tsx            # Top bar — logo, user email, daily limit badge, logout
-  ProposalForm.tsx      # (inline in proposal/page.tsx) — all form sections
-  ProposalPreview.tsx   # Right-side live preview (also captured for PDF)
-  RoomCard.tsx          # Per-room card with dynamic equipment rows
+  Navbar.tsx                  # Top bar — logo, user email, daily limit badge, logout
+  ProposalPreview.tsx         # Right-side live preview (also captured for PDF)
+  RoomCard.tsx                # Per-room card with dynamic equipment rows
+  BlogIframe.tsx              # Renders blog post HTML+CSS in a sandboxed iframe
+  SideBanner.tsx              # Displays an R2-hosted banner image with optional link
 lib/
-  supabase.ts           # createClient() — browser Supabase client via @supabase/ssr
+  supabase.ts                 # createClient() — browser Supabase client via @supabase/ssr
 types/
-  proposal.ts           # ProposalData, Room, EquipmentItem types + helpers
-middleware.ts           # Auth guard: /proposal requires session
+  proposal.ts                 # ProposalData, Room, EquipmentItem types + helpers
+  blog.ts                     # BlogPost type
+  qa.ts                       # QAItem type
+middleware.ts                 # Auth guard: /proposal and /admin require session
 supabase/migrations/
-  001_create_proposals.sql  # Run in Supabase SQL Editor
+  001_create_proposals.sql    # proposals table + RLS
+  002_admin_blog.sql          # blog_posts table + profiles.is_admin
+  003_banners.sql             # banners table
+  004_blog_cover_image.sql    # adds cover_image to blog_posts
+  005_qa_hub.sql              # qa_items table
+  006_qa_categories.sql       # qa_categories table
 ```
 
 ## Environment variables
@@ -58,11 +85,17 @@ After changing `.env.local`, always restart the dev server.
 
 ## Supabase setup
 
-Run `supabase/migrations/001_create_proposals.sql` in the Supabase SQL Editor once.
+Run all migrations in `supabase/migrations/` in order (001 → 006) in the Supabase SQL Editor.
 
-The `proposals` table only tracks **download events** (id, user_id, created_at, date) — proposal content is local React state, not persisted in the database.
+Key tables:
+- `proposals` — download events only (id, user_id, created_at, date); no proposal content persisted
+- `profiles` — one row per user; `is_admin: boolean` gates the admin panel
+- `blog_posts` — title, slug, html_content, css_content, cover_image, published
+- `banners` — image_url, link_url for SideBanner ads
+- `qa_items` — question, slug, answer, category, published, position
+- `qa_categories` — category definitions for FAQ hub
 
-RLS policies are enabled — users can only read/insert their own rows.
+RLS policies are enabled — users can only read/insert their own rows. Admin routes check `profiles.is_admin` client-side in `admin/layout.tsx`.
 
 **Important:** Disable "Confirm email" in Supabase → Authentication → Providers → Email for easier onboarding.
 
@@ -72,7 +105,7 @@ RLS policies are enabled — users can only read/insert their own rows.
 - Public Development URL enabled → `https://pub-80a2efeab35a40eaa2cf45b2bd84fb0e.r2.dev`
 - API Token permissions: Object Read & Write on `avproposal` bucket
 
-Logo uploads use base64 for instant local preview, then replace with R2 CDN URL after background upload completes.
+Logo uploads use base64 for instant local preview, then replace with R2 CDN URL after background upload completes. Banner images are also stored in R2.
 
 ## Daily limit logic
 
@@ -85,6 +118,18 @@ Logo uploads use base64 for instant local preview, then replace with R2 CDN URL 
 
 html2canvas captures `#proposal-preview` div at 2× scale, jsPDF converts to A4.
 Multi-page support: canvas is split across pages if content exceeds one page height.
+
+## Admin panel
+
+Protected by `admin/layout.tsx` — checks `profiles.is_admin`; redirects to `/auth` if not logged in or `/proposal` if not admin. Sidebar nav includes: Users, Blog Posts, Banners, Q&A Hub, Categories.
+
+## Blog
+
+Blog posts store raw HTML + CSS (authored in the admin editor). `BlogIframe.tsx` renders them in a sandboxed iframe to isolate styles. Posts have a `cover_image` (R2 URL) and a `published` flag.
+
+## FAQ / Q&A Hub
+
+Q&A items have a slug, category, position (for ordering), and `published` flag. Categories are managed separately. Public pages live at `/faq` and `/faq/[slug]`.
 
 ## Mobile-first design
 
@@ -99,7 +144,7 @@ Rules that must never be broken:
 Page-specific behaviour:
 - **Proposal builder** — on mobile a Form / Preview tab switcher (`lg:hidden`) lets users toggle between the form and the live preview. The desktop two-column layout is preserved with `lg:flex`.
 - **Admin panel** — sidebar is hidden on mobile; a hamburger button in the top bar slides it in as a fixed overlay (`fixed lg:relative`). Links close the drawer on tap.
-- **Home / Blog / Auth** — single-column on mobile, expand at `sm:` / `lg:`.
+- **Home / Blog / Auth / FAQ** — single-column on mobile, expand at `sm:` / `lg:`.
 
 When adding any new page or component, verify it on a 375 px viewport before committing.
 
