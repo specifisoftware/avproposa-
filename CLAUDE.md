@@ -33,7 +33,7 @@ app/
   admin/blog/page.tsx         # Blog post list + create
   admin/blog/[id]/page.tsx    # Blog post editor
   admin/banners/page.tsx      # Side-banner management
-  admin/faq/page.tsx          # Q&A item list + create
+  admin/faq/page.tsx          # Q&A item list + create + bulk upload modal
   admin/faq/[id]/page.tsx     # Q&A item editor
   admin/faq/categories/page.tsx # FAQ category management
 components/
@@ -158,6 +158,20 @@ Blog posts store raw HTML + CSS (authored in the admin editor). `BlogIframe.tsx`
 
 Q&A items have a slug, category, position (for ordering), and `published` flag. Categories are managed separately. Public pages live at `/faq` and `/faq/[slug]`.
 
+### Bulk upload
+
+The admin FAQ list page (`/admin/faq`) has a **Bulk Upload** button that opens a modal supporting CSV and TXT (tab- or pipe-separated) files. The parser:
+- Auto-detects a header row and maps columns by name (`question`/`title`/`q`, `answer`/`a`, `category`/`cat`/`tag`), falling back to positional order (col 1, 2, 3)
+- Shows a live preview table with per-row include/exclude checkboxes before inserting
+- Auto-generates slugs via `slugify()` and increments on collision with existing slugs
+- Lets the admin set published/draft status for all imported rows in one toggle
+
+Expected CSV format:
+```
+question,answer,category
+"How does X work?","It works by doing Y","General"
+```
+
 ## Mobile-first design
 
 **Mobile-friendliness is a core requirement.** Every page and component must work on screens ≥ 375 px wide.
@@ -179,3 +193,15 @@ When adding any new page or component, verify it on a 375 px viewport before com
 
 GitHub repo: `https://github.com/specifisoftware/avproposa-`
 Hosting: Vercel (auto-deploys on push to `main`)
+
+## Sitemap
+
+`app/sitemap.ts` — dynamically generated, `revalidate = 0`.
+
+| URL pattern | changeFrequency | priority |
+|---|---|---|
+| `/` | weekly | 1.0 |
+| `/blog` | weekly | 0.8 |
+| `/faq` | weekly | 0.8 |
+| `/blog/[slug]` | monthly | 0.7 |
+| `/faq/[slug]` | weekly | 0.8 |
