@@ -34,8 +34,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const faqUrls: MetadataRoute.Sitemap = (qaItems ?? []).map((item) => ({
     url: `${BASE_URL}/faq/${item.slug}`,
     lastModified: new Date(item.updated_at),
-    changeFrequency: 'monthly',
-    priority: 0.6,
+    changeFrequency: 'weekly',
+    priority: 0.8,
   }))
 
   return [
