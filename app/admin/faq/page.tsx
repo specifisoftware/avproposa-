@@ -120,7 +120,7 @@ function BulkUploadModal({ onClose, onImported }: { onClose: () => void; onImpor
     const usedSlugs = new Set((existing ?? []).map((r: { slug: string }) => r.slug))
 
     const payload = toImport.map((r, i) => {
-      let base = slugify(r.question) || `faq-${Date.now()}-${i}`
+      const base = slugify(r.question) || `faq-${Date.now()}-${i}`
       let slug = base
       let n = 2
       while (usedSlugs.has(slug)) { slug = `${base}-${n++}` }
